@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GameReviews.Data;
 using GameReviews.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GameReviews.Controllers
 {
@@ -53,6 +54,7 @@ namespace GameReviews.Controllers
         [HttpPost]
         [Route("{controller}/{action}/{id}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Create(Review review)
         {
             review.Game = _context.Game.FirstOrDefault(g => g.Id == review.GameRefReviewId);
@@ -73,6 +75,7 @@ namespace GameReviews.Controllers
 
         // GET: Reviews/Create
         [Route("{controller}/{action}/{id}")]
+        [Authorize(Roles = "Admin,User")]
         public IActionResult Create(int id)
         {
             Console.WriteLine("Game id in GET:" + id);
@@ -86,6 +89,7 @@ namespace GameReviews.Controllers
 
 
         // GET: Reviews/Edit/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -108,6 +112,7 @@ namespace GameReviews.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Date,Content,GameRefReviewId,CommentRefReviewId,ReviewRefUserId")] Review review)
         {
             if (id != review.Id)
@@ -141,6 +146,7 @@ namespace GameReviews.Controllers
         }
 
         // GET: Reviews/Delete/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -163,6 +169,7 @@ namespace GameReviews.Controllers
         // POST: Reviews/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var review = await _context.Review.FindAsync(id);

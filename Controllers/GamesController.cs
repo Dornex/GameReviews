@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GameReviews.Data;
 using GameReviews.Models;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GameReviews.Controllers
 {
@@ -82,6 +83,7 @@ namespace GameReviews.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Create([Bind("Id,Name,ReleaseDate,Genre,Price")] Game game)
         {
             var file = Request.Form.Files[0];
@@ -107,6 +109,7 @@ namespace GameReviews.Controllers
         }
 
         // GET: Games/Edit/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -127,6 +130,7 @@ namespace GameReviews.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,ReleaseDate,Genre,Price")] Game game)
         {
             if (id != game.Id)
@@ -158,6 +162,7 @@ namespace GameReviews.Controllers
         }
 
         // GET: Games/Delete/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -178,6 +183,7 @@ namespace GameReviews.Controllers
         // POST: Games/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var game = await _context.Game.FindAsync(id);

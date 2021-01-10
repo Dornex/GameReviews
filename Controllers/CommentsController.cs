@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GameReviews.Data;
 using GameReviews.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GameReviews.Controllers
 {
@@ -54,6 +55,7 @@ namespace GameReviews.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Create(Comment comment)
         {
             if (ModelState.IsValid)
@@ -71,6 +73,7 @@ namespace GameReviews.Controllers
         }
 
         // GET: Comments/Edit/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -91,6 +94,7 @@ namespace GameReviews.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Edit(int id, int gameId, Comment comment)
         {
             if (id != comment.Id)
@@ -126,6 +130,7 @@ namespace GameReviews.Controllers
         }
 
         // GET: Comments/Delete/5
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -146,6 +151,7 @@ namespace GameReviews.Controllers
         // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var comment = await _context.Comment.FindAsync(id);
