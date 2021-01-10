@@ -1,40 +1,143 @@
 ﻿@model GameReviews.Models.Game
-
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+
 
 <div>
-    <h4>Game</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReleaseDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReleaseDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Genre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Genre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Price)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Price)
-        </dd>
-    </dl>
+    <div class="row d-flex w-100 justify-content-center">
+        <dl>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Name)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Name)
+            </dd>
+            <dt class="col-sm-4">
+                Cover Image
+            </dt>
+            <dd class="col-sm-10">
+                <img src="@Model.Image.ImageString" />
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.ReleaseDate)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.ReleaseDate)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Genre)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Genre)
+            </dd>
+            <dt class="col-sm-4">
+                @Html.DisplayNameFor(model => model.Price)
+            </dt>
+            <dd class="col-sm-10">
+                @Html.DisplayFor(model => model.Price)
+            </dd>
+        </dl>
+    </div>
+
+    <br />
+    <div class="ml-3">
+        <div class="row d-flex align-items-center">
+            <h1>Reviews</h1>
+            <div class="ml-5">
+
+                @using (Html.BeginForm(actionName: "Create", controllerName: "Reviews", method: FormMethod.Get, routeValues: new { id = Model.Id }))
+                {
+                    <button type="submit" class="btn btn-sm btn-primary">Add a review</button>
+                }
+            </div>
+
+        </div>
+        <div>
+            <ul style="list-style-type: none;">
+                @foreach (var review in Model.Reviews)
+                {
+                    <li class="mb-5">
+                        <div class="card">
+                            <h3 class="card-header">@(review.Title)</h3>
+                            <div class="card-body">
+                                <p>@(review.Content)</p>
+
+                                <div class="d-flex justify-content-end">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        @using (Html.BeginForm(actionName: "Edit", controllerName: "Reviews", method: FormMethod.Get, routeValues: new { id = review.Id }))
+                                        {
+                                            <button type="submit" class="btn btn-info btn-sm">Edit review</button>
+                                        }
+                                    }
+
+                                    @if (User.IsInRole("Admin") || (User.IsInRole("User") && UserManager.GetUserId(User) == review.User.Id))
+                                    {
+                                        <form class="ml-2" asp-action="Delete" asp-controller="Reviews">
+                                            <input type="hidden" name="Id" value="@(review.Id)" />
+                                            <button type="submit" class="btn btn-sm btn-danger">Delete review</button>
+                                        </form>
+                                    }
+
+                                </div>
+
+                                @if (review.Comments.Count != 0)
+                                {
+                                    <h5>Comments</h5>
+                                    <ul class="m-3" style="list-style-type: none;">
+                                        @foreach (var comment in review.Comments)
+                                        {
+                                            <li>
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title mr-2">@(comment.User.Email)</h5>
+                                                        <h6 class="card-subtitle">@(comment.Date)</h6>
+                                                        <p class="card-text">@(comment.Content)</p>
+                                                        <div class="d-flex justify-content-end">
+                                                            @using (Html.BeginForm(actionName: "Edit", controllerName: "Comments", method: FormMethod.Get, routeValues: new { id = comment.Id }))
+                                                            {
+                                                                <button type="submit" class="btn btn-info btn-sm">Edit comment</button>
+                                                            }
+                                                            <form class="ml-2" asp-action="Delete" asp-controller="Comments">
+                                                                <input type="hidden" name="Id" value="@(comment.Id)" />
+                                                                <button type="submit" class="btn btn-sm btn-danger">Delete comment</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                <div class="card-footer">
+                                    <form asp-action="Create" asp-controller="Comments">
+                                        <div class="form-group">
+                                            <textarea name="Content" id="Comment" rows="5" cols="50" style="resize: none"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <input hidden="hidden" name="CommentRefReviewId" value="@(review.Id)" />
+                                        </div>
+                                        <div class="form-group">
+                                            <input hidden="hidden" name="ReviewRefUserId" value="@(UserManager.GetUserId(User))" />
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-sm btn-primary">Add a comment</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |

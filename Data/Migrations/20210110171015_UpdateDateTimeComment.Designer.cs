@@ -4,14 +4,16 @@ using GameReviews.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GameReviews.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210110171015_UpdateDateTimeComment")]
+    partial class UpdateDateTimeComment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,6 +31,9 @@ namespace GameReviews.Data.Migrations
                     b.Property<int>("CommentRefReviewId")
                         .HasColumnType("int");
 
+                    b.Property<string>("CommentRefUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -41,14 +46,11 @@ namespace GameReviews.Data.Migrations
                     b.Property<string>("ReviewRefUserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ReviewId");
+                    b.HasIndex("CommentRefUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ReviewId");
 
                     b.ToTable("Comment");
                 });
@@ -119,6 +121,9 @@ namespace GameReviews.Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("CommentRefReviewId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -130,20 +135,17 @@ namespace GameReviews.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ReviewRefUserId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("GameRefReviewId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ReviewRefUserId");
 
                     b.ToTable("Review");
                 });
@@ -211,6 +213,10 @@ namespace GameReviews.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -262,6 +268,8 @@ namespace GameReviews.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -344,15 +352,22 @@ namespace GameReviews.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("GameReviews.Models.ApplicationUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.HasDiscriminator().HasValue("ApplicationUser");
+                });
+
             modelBuilder.Entity("GameReviews.Models.Comment", b =>
                 {
+                    b.HasOne("GameReviews.Models.ApplicationUser", "User")
+                        .WithMany("Comments")
+                        .HasForeignKey("CommentRefUserId");
+
                     b.HasOne("GameReviews.Models.Review", "Review")
                         .WithMany()
                         .HasForeignKey("ReviewId");
-
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("GameReviews.Models.Game", b =>
@@ -370,9 +385,9 @@ namespace GameReviews.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                    b.HasOne("GameReviews.Models.ApplicationUser", "User")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ReviewRefUserId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

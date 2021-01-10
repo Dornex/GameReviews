@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,12 +13,12 @@ namespace GameReviews.Models
         public int Id { get; set; }
         public string Content { get; set; }
 
-        [DataType(DataType.Date)]
+        [DataType(DataType.DateTime)]
         [Required]
         public DateTime Date { get; set; }
 
         public string ReviewRefUserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public IdentityUser User { get; set; }
 
         public int CommentRefReviewId { get; set; }
         public Review Review { get; set; }

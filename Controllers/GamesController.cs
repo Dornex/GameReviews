@@ -23,7 +23,7 @@ namespace GameReviews.Controllers
         // GET: Games
         public async Task<IActionResult> Index()
         {
-            var games = await _context.Game.Include(game => game.Image).ToListAsync();
+            var games = await _context.Game.Include(game => game.Image).Include(game => game.Reviews).ToListAsync();
             foreach (var game in games)
             {
                 Image img = game.Image;
@@ -43,11 +43,30 @@ namespace GameReviews.Controllers
             }
 
             var game = await _context.Game
+                .Include(game => game.Image)
+                .Include(game => game.Reviews)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
+            foreach (var review in game.Reviews)
+            {
+                review.Comments = _context.Comment.Where(comment => comment.CommentRefReviewId == review.Id).ToList();
+                review.User = _context.Users.FirstOrDefault(user => user.Id == review.ReviewRefUserId);
+
+                foreach (var comment in review.Comments)
+                {
+                    comment.User = _context.Users.FirstOrDefault(user => user.Id == comment.ReviewRefUserId);
+                }
+            }
+
             if (game == null)
             {
                 return NotFound();
             }
+
+            Image img = game.Image;
+            string imageBase64Data = Convert.ToBase64String(img.ImageData);
+            string imageDataUrl = string.Format("data:image/jpg;base64,{0}", imageBase64Data);
+            img.ImageString = imageDataUrl;
 
             return View(game);
         }

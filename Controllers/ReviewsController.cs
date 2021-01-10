@@ -7,16 +7,18 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GameReviews.Data;
 using GameReviews.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace GameReviews.Controllers
 {
     public class ReviewsController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public ReviewsController(ApplicationDbContext context)
+        private readonly UserManager<IdentityUser> _userManager;
+        public ReviewsController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Reviews
@@ -37,7 +39,9 @@ namespace GameReviews.Controllers
             var review = await _context.Review
                 .Include(r => r.Game)
                 .Include(r => r.User)
+                .Include(r => r.Comments)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (review == null)
             {
                 return NotFound();
@@ -46,31 +50,40 @@ namespace GameReviews.Controllers
             return View(review);
         }
 
-        // GET: Reviews/Create
-        public IActionResult Create()
+        [HttpPost]
+        [Route("{controller}/{action}/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Review review)
         {
-            ViewData["GameRefReviewId"] = new SelectList(_context.Game, "Id", "Genre");
-            ViewData["ReviewRefUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id");
+            review.Game = _context.Game.FirstOrDefault(g => g.Id == review.GameRefReviewId);
+            review.Id = 0;
+
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            if (ModelState.IsValid)
+            {
+                review.ReviewRefUserId = user.Id;
+                _context.Add(review);
+                await _context.SaveChangesAsync();
+
+                var game = _context.Game.FirstOrDefault(game => game.Id == review.GameRefReviewId);
+                return RedirectToAction("Details", "Games", new { id = game.Id });
+            }
+            return View(review);
+        }
+
+        // GET: Reviews/Create
+        [Route("{controller}/{action}/{id}")]
+        public IActionResult Create(int id)
+        {
+            Console.WriteLine("Game id in GET:" + id);
+            ViewData["GameId"] = id;
             return View();
         }
 
         // POST: Reviews/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Date,Content,GameRefReviewId,CommentRefReviewId,ReviewRefUserId")] Review review)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(review);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["GameRefReviewId"] = new SelectList(_context.Game, "Id", "Genre", review.GameRefReviewId);
-            ViewData["ReviewRefUserId"] = new SelectList(_context.Set<ApplicationUser>(), "Id", "Id", review.ReviewRefUserId);
-            return View(review);
-        }
+
 
         // GET: Reviews/Edit/5
         public async Task<IActionResult> Edit(int? id)

@@ -16,5 +16,6 @@ namespace GameReviews.Data
         public DbSet<GameReviews.Models.Game> Game { get; set; }
         public DbSet<GameReviews.Models.Image> Image { get; set; }
         public DbSet<GameReviews.Models.Review> Review { get; set; }
+        public DbSet<GameReviews.Models.Comment> Comment { get; set; }
     }
 }

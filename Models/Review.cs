@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,10 +25,10 @@ namespace GameReviews.Models
         public int GameRefReviewId { get; set; }
         public Game Game { get; set; }
 
-        public int CommentRefReviewId { get; set; }
+        [ForeignKey("CommentRefReviewId")]
         public ICollection<Comment> Comments;
 
         public string ReviewRefUserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public IdentityUser User { get; set; }
     }
 }
