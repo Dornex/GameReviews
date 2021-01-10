@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using GameReviews.Models;
 
 namespace GameReviews.Data
 {
@@ -12,5 +13,8 @@ namespace GameReviews.Data
             : base(options)
         {
         }
+        public DbSet<GameReviews.Models.Game> Game { get; set; }
+        public DbSet<GameReviews.Models.Image> Image { get; set; }
+        public DbSet<GameReviews.Models.Review> Review { get; set; }
     }
 }
