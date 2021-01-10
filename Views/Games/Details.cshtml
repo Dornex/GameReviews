@@ -50,9 +50,12 @@
             <h1>Reviews</h1>
             <div class="ml-5">
 
-                @using (Html.BeginForm(actionName: "Create", controllerName: "Reviews", method: FormMethod.Get, routeValues: new { id = Model.Id }))
+                @if (User.IsInRole("Admin") || User.IsInRole("User"))
                 {
-                    <button type="submit" class="btn btn-sm btn-primary">Add a review</button>
+                    @using (Html.BeginForm(actionName: "Create", controllerName: "Reviews", method: FormMethod.Get, routeValues: new { id = Model.Id }))
+                    {
+                        <button type="submit" class="btn btn-sm btn-primary">Add a review</button>
+                    }
                 }
             </div>
 
@@ -68,7 +71,7 @@
                                 <p>@(review.Content)</p>
 
                                 <div class="d-flex justify-content-end">
-                                    @if (User.IsInRole("Admin"))
+                                    @if (User.IsInRole("Admin") || (User.IsInRole("User") && UserManager.GetUserId(User) == review.User.Id))
                                     {
                                         @using (Html.BeginForm(actionName: "Edit", controllerName: "Reviews", method: FormMethod.Get, routeValues: new { id = review.Id }))
                                         {
@@ -99,14 +102,20 @@
                                                         <h6 class="card-subtitle">@(comment.Date)</h6>
                                                         <p class="card-text">@(comment.Content)</p>
                                                         <div class="d-flex justify-content-end">
-                                                            @using (Html.BeginForm(actionName: "Edit", controllerName: "Comments", method: FormMethod.Get, routeValues: new { id = comment.Id }))
+                                                            @if (User.IsInRole("Admin") || (User.IsInRole("User") && UserManager.GetUserId(User) == comment.User.Id))
                                                             {
-                                                                <button type="submit" class="btn btn-info btn-sm">Edit comment</button>
+                                                                @using (Html.BeginForm(actionName: "Edit", controllerName: "Comments", method: FormMethod.Get, routeValues: new { id = comment.Id }))
+                                                                {
+                                                                    <button type="submit" class="btn btn-info btn-sm">Edit comment</button>
+                                                                }
                                                             }
-                                                            <form class="ml-2" asp-action="Delete" asp-controller="Comments">
-                                                                <input type="hidden" name="Id" value="@(comment.Id)" />
-                                                                <button type="submit" class="btn btn-sm btn-danger">Delete comment</button>
-                                                            </form>
+                                                            @if (User.IsInRole("Admin") || (User.IsInRole("User") && UserManager.GetUserId(User) == comment.User.Id))
+                                                            {
+                                                                <form class="ml-2" asp-action="Delete" asp-controller="Comments">
+                                                                    <input type="hidden" name="Id" value="@(comment.Id)" />
+                                                                    <button type="submit" class="btn btn-sm btn-danger">Delete comment</button>
+                                                                </form>
+                                                            }
                                                         </div>
                                                     </div>
 
@@ -115,22 +124,25 @@
                                         }
                                     </ul>
                                 }
-                                <div class="card-footer">
-                                    <form asp-action="Create" asp-controller="Comments">
-                                        <div class="form-group">
-                                            <textarea name="Content" id="Comment" rows="5" cols="50" style="resize: none"></textarea>
-                                        </div>
-                                        <div class="form-group">
-                                            <input hidden="hidden" name="CommentRefReviewId" value="@(review.Id)" />
-                                        </div>
-                                        <div class="form-group">
-                                            <input hidden="hidden" name="ReviewRefUserId" value="@(UserManager.GetUserId(User))" />
-                                        </div>
-                                        <div class="form-group">
-                                            <button type="submit" class="btn btn-sm btn-primary">Add a comment</button>
-                                        </div>
-                                    </form>
-                                </div>
+                                @if (User.IsInRole("Admin") || User.IsInRole("User"))
+                                {
+                                    <div class="card-footer">
+                                        <form asp-action="Create" asp-controller="Comments">
+                                            <div class="form-group">
+                                                <textarea name="Content" id="Comment" rows="5" cols="50" style="resize: none"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <input hidden="hidden" name="CommentRefReviewId" value="@(review.Id)" />
+                                            </div>
+                                            <div class="form-group">
+                                                <input hidden="hidden" name="ReviewRefUserId" value="@(UserManager.GetUserId(User))" />
+                                            </div>
+                                            <div class="form-group">
+                                                <button type="submit" class="btn btn-sm btn-primary">Add a comment</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </li>

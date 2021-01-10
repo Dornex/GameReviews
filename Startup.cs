@@ -1,4 +1,5 @@
 using GameReviews.Data;
+using GameReviews.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -27,6 +28,8 @@ namespace GameReviews
         private void CreateRoles(IServiceProvider serviceProvider)
         {
             var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var UserManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
 
             string[] roleNames = { "Admin", "User" };
             Task<IdentityResult> roleResult;
@@ -41,6 +44,28 @@ namespace GameReviews
                     roleResult.Wait();
                 }
             }
+
+            var _userExist = UserManager.FindByEmailAsync("admin@admin.com");
+            _userExist.Wait();
+
+            if (_userExist == null)
+            {
+                var powerUser = new ApplicationUser
+                {
+                    UserName = "Admin",
+                    Email = "admin@admin.com"
+                };
+                string adminPassword = "admin";
+
+                var createPowerUser = UserManager.CreateAsync(powerUser, adminPassword);
+                createPowerUser.Wait();
+
+                if (createPowerUser.IsCompletedSuccessfully)
+                {
+                    UserManager.AddToRoleAsync(powerUser, "Admin").Wait();
+                }
+            }
+
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
