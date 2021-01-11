@@ -22,6 +22,7 @@ namespace GameReviews.Models
         public string Genre { get; set; }
 
         [Required]
+        [ValidB]
         public decimal Price { get; set; }
 
         [ForeignKey("GameRefImgId")]

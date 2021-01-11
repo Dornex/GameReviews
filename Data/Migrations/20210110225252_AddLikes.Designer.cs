@@ -4,14 +4,16 @@ using GameReviews.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GameReviews.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210110225252_AddLikes")]
+    partial class AddLikes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,6 +31,9 @@ namespace GameReviews.Data.Migrations
                     b.Property<int>("CommentRefReviewId")
                         .HasColumnType("int");
 
+                    b.Property<string>("CommentRefUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -36,7 +41,6 @@ namespace GameReviews.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ReviewRefUserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
@@ -45,6 +49,8 @@ namespace GameReviews.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CommentRefReviewId");
+
+                    b.HasIndex("CommentRefUserId");
 
                     b.HasIndex("UserId");
 
@@ -110,6 +116,21 @@ namespace GameReviews.Data.Migrations
                     b.ToTable("Image");
                 });
 
+            modelBuilder.Entity("GameReviews.Models.Likes", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ReviewId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Likes");
+                });
+
             modelBuilder.Entity("GameReviews.Models.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -128,8 +149,7 @@ namespace GameReviews.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ReviewRefUserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -141,6 +161,8 @@ namespace GameReviews.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GameRefReviewId");
+
+                    b.HasIndex("ReviewRefUserId");
 
                     b.HasIndex("UserId");
 
@@ -210,6 +232,10 @@ namespace GameReviews.Data.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
@@ -261,6 +287,8 @@ namespace GameReviews.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -343,6 +371,13 @@ namespace GameReviews.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("GameReviews.Models.ApplicationUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.HasDiscriminator().HasValue("ApplicationUser");
+                });
+
             modelBuilder.Entity("GameReviews.Models.Comment", b =>
                 {
                     b.HasOne("GameReviews.Models.Review", "Review")
@@ -350,6 +385,10 @@ namespace GameReviews.Data.Migrations
                         .HasForeignKey("CommentRefReviewId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("GameReviews.Models.ApplicationUser", null)
+                        .WithMany("Comments")
+                        .HasForeignKey("CommentRefUserId");
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
                         .WithMany()
@@ -363,6 +402,21 @@ namespace GameReviews.Data.Migrations
                         .HasForeignKey("GameReviews.Models.Game", "GameRefImgId");
                 });
 
+            modelBuilder.Entity("GameReviews.Models.Likes", b =>
+                {
+                    b.HasOne("GameReviews.Models.Review", "Review")
+                        .WithMany("Likes")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GameReviews.Models.ApplicationUser", "User")
+                        .WithMany("Likes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("GameReviews.Models.Review", b =>
                 {
                     b.HasOne("GameReviews.Models.Game", "Game")
@@ -370,6 +424,10 @@ namespace GameReviews.Data.Migrations
                         .HasForeignKey("GameRefReviewId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("GameReviews.Models.ApplicationUser", null)
+                        .WithMany("Reviews")
+                        .HasForeignKey("ReviewRefUserId");
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
                         .WithMany()

@@ -17,9 +17,11 @@ namespace GameReviews.Models
         [Required]
         public DateTime Date { get; set; }
 
+        [Required]
         public string ReviewRefUserId { get; set; }
         public IdentityUser User { get; set; }
 
+        [Required]
         public int CommentRefReviewId { get; set; }
         public Review Review { get; set; }
 

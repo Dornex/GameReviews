@@ -9,9 +9,12 @@
 <h1>Best Games Reviews</h1>
 
 <div class="mt-3 mb-3">
-    @using (Html.BeginForm(actionName: "Create", controllerName: "Games", method: FormMethod.Get))
+    @if (User.IsInRole("Admin"))
     {
-        <button type="submit" class="btn btn-primary">Add new game</button>
+        @using (Html.BeginForm(actionName: "Create", controllerName: "Games", method: FormMethod.Get))
+        {
+            <button type="submit" class="btn btn-primary">Add new game</button>
+        }
     }
 </div>
 
@@ -32,7 +35,6 @@
                 @Html.DisplayNameFor(model => model.Genre)
             </th>
             <th>
-                1
                 @Html.DisplayNameFor(model => model.Price)
             </th>
             <th></th>

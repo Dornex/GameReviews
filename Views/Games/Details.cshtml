@@ -49,7 +49,6 @@
         <div class="row d-flex align-items-center">
             <h1>Reviews</h1>
             <div class="ml-5">
-
                 @if (User.IsInRole("Admin") || User.IsInRole("User"))
                 {
                     @using (Html.BeginForm(actionName: "Create", controllerName: "Reviews", method: FormMethod.Get, routeValues: new { id = Model.Id }))

@@ -22,12 +22,14 @@ namespace GameReviews.Models
         [Required]
         public string Content { get; set; }
 
+        [Required]
         public int GameRefReviewId { get; set; }
         public Game Game { get; set; }
 
         [ForeignKey("CommentRefReviewId")]
-        public ICollection<Comment> Comments;
+        public ICollection<Comment> Comments { get; set; }
 
+        [Required]
         public string ReviewRefUserId { get; set; }
         public IdentityUser User { get; set; }
     }
